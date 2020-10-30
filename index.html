@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.13.0/beautify.min.js"></script>
+</head>
+<body>
+    <div class="main-box">
+        <div><textarea onkeyup="clearrr()"  placeholder="Paste Here..." class="code-area" cols="80" rows="48" id="pageDef"></textarea></div>
+        <div><button id="sub" class="change-me" onclick="changeMe(this)">Change Me</button></div>
+        <div><textarea readonly class="code-area" name="" id="output" cols="80" rows="48"></textarea></div>
+    </div>
+</body>
+<script>
+    function clearrr(){
+        var output = document.getElementById("output");
+        output.value = null;
+        document.getElementById("pageDef").scrollTop = 1; 
+
+    }
+    function autoindent(code_elem) {
+    // Grab the lines
+        var textContent = document.textContent === null ? 'textContent' : 'innerText';
+        var lines = code_elem[textContent].split(/\r?\n/),
+            fragment = document.createDocumentFragment(),
+            dummy, space_width, i, prefix_len, line_elem;
+
+        // Calculate the width of white space
+        // Assume that inline element inherit styles from parent (<code>)
+        dummy = document.createElement('span');
+        code_elem.appendChild(dummy);
+        // offsetWidth includes padding and border, explicitly override the style:
+        dummy.style.cssText = 'border:0;padding:0;';
+        dummy[textContent] = '          ';
+        space_width = dummy.offsetWidth / 10;
+        // Wipe contents
+        code_elem.innerHTML = '';
+        
+        for (i=0; i<lines.length; i++) {
+            // NOTE: All preceeding white space (including tabs is included)
+            prefix_len = /^\s*/.exec(lines[i])[0].length;
+            line_elem = fragment.appendChild(document.createElement('div'));
+            line_elem.style.marginLeft = space_width * prefix_len + 'px';
+            line_elem[textContent] = lines[i].substring(prefix_len);
+        }
+        // Finally, append (all elements inside) the fragment:
+        code_elem.appendChild(fragment);
+    }
+    function changeMe(btn){
+        var data = document.getElementById("pageDef");
+        var output = document.getElementById("output");
+        var irf = {}
+        irf.pageCollection = {}
+        irf.page = function(string){
+            return string;
+        }
+        irf.pageCollection.factory = function(pageUID,dependencyFunctions){
+            var pageFn = dependencyFunctions[dependencyFunctions.length -1];
+            dependencyFunctions.pop();
+            var dependency = dependencyFunctions
+            return  `
+                define([],function(){
+                    return {
+                        pageType:"Engine",
+                        pageUID:"${pageUID}",
+                        dependency:[${dependency}],
+                        $pageFn:${pageFn}
+                    }
+                })`
+        }
+        output.value = js_beautify((eval(data.value)));
+        copyTextToClipboard(output.value);
+        data.value = null;
+    }
+    function copyTextToClipboard(text) {
+  var textArea = document.createElement("textarea");
+
+  //
+  // *** This styling is an extra step which is likely not required. ***
+  //
+  // Why is it here? To ensure:
+  // 1. the element is able to have focus and selection.
+  // 2. if element was to flash render it has minimal visual impact.
+  // 3. less flakyness with selection and copying which **might** occur if
+  //    the textarea element is not visible.
+  //
+  // The likelihood is the element won't even render, not even a
+  // flash, so some of these are just precautions. However in
+  // Internet Explorer the element is visible whilst the popup
+  // box asking the user for permission for the web page to
+  // copy to the clipboard.
+  //
+
+  // Place in top-left corner of screen regardless of scroll position.
+  textArea.style.position = 'fixed';
+  textArea.style.top = 0;
+  textArea.style.left = 0;
+
+  // Ensure it has a small width and height. Setting to 1px / 1em
+  // doesn't work as this gives a negative w/h on some browsers.
+  textArea.style.width = '2em';
+  textArea.style.height = '2em';
+
+  // We don't need padding, reducing the size if it does flash render.
+  textArea.style.padding = 0;
+
+  // Clean up any borders.
+  textArea.style.border = 'none';
+  textArea.style.outline = 'none';
+  textArea.style.boxShadow = 'none';
+
+  // Avoid flash of white box if rendered for any reason.
+  textArea.style.background = 'transparent';
+
+
+  textArea.value = text;
+
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    var successful = document.execCommand('copy');
+    var msg = successful ? 'successful' : 'unsuccessful';
+    console.log('Copying text command was ' + msg);
+  } catch (err) {
+    console.log('Oops, unable to copy');
+  }
+
+  document.body.removeChild(textArea);
+}
+
+</script>
+<style>
+    .main-box{
+        display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    justify-items: center;
+    align-items: center;
+    }
+    .code-area{
+        border: 3px solid #00000085;
+        outline: none;
+    }
+    .change-me{
+        border: none;
+        box-shadow: 0px 0px 7px 0px;
+    /* border: 1px solid green; */
+        padding: 9px;
+        cursor: pointer;
+    }
+</style>
+</html>
