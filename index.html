@@ -59,13 +59,17 @@
         irf.pageCollection.factory = function(pageUID,dependencyFunctions){
             var pageFn = dependencyFunctions[dependencyFunctions.length -1];
             dependencyFunctions.pop();
-            var dependency = dependencyFunctions
+            var dependency = dependencyFunctions.reduce(function(o,p,index){
+                if(index == 1)
+                    return '"'+o+'",';
+                return o + '"'+p+'",';
+            }).slice(0,-1);
             return  `
                 define([],function(){
                     return {
                         pageType:"Engine",
                         pageUID:"${pageUID}",
-                        dependency:[${dependency}],
+                        dependencies  :[${dependency}],
                         $pageFn:${pageFn}
                     }
                 })`
