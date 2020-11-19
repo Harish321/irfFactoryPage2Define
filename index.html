@@ -12,6 +12,9 @@
         <div><button id="sub" class="change-me" onclick="changeMe(this)">Change Me</button></div>
         <div><textarea readonly class="code-area" name="" id="output" cols="80" rows="48"></textarea></div>
     </div>
+    <div class="fotter">
+        Interested In collaboration! Please visit my profile <a target="blank" href="https://github.com/Harish321?tab=repositories">Harish Dhulipalla.</a>
+    </div>
 </body>
 <script>
     function clearrr(){
@@ -61,7 +64,7 @@
             dependencyFunctions.pop();
             var dependency = dependencyFunctions.reduce(function(o,p,index){
                 if(index == 1)
-                    return '"'+o+'",';
+                    return '"'+o+'",'+'"'+p+'",';
                 return o + '"'+p+'",';
             }).slice(0,-1);
             return  `
@@ -154,6 +157,13 @@
     /* border: 1px solid green; */
         padding: 9px;
         cursor: pointer;
+    }
+    .fotter {
+        position: fixed;
+        left: 0;
+        bottom:10px;
+        width: 100%;
+        text-align: center;
     }
 </style>
 </html>
